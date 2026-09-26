@@ -1,7 +1,8 @@
-import express, {type Express} from "express"
+import express, { type Express } from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
 import dotenv from "dotenv"
+import logger from "./core/Logger.js"
 
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js"
 import userRoutes from "./routes/userRoutes.js"
@@ -10,14 +11,14 @@ import "./database/index.js"
 
 dotenv.config()
 
-const app : Express= express()
+const app: Express = express()
 const port = Number(process.env.PORT ?? 5000)
 
 app.use(
   cors({
     origin: process.env.CORS_URL ?? "http://localhost:3000",
     credentials: true,
-  })
+  }),
 )
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
@@ -35,6 +36,8 @@ app.use(errorHandler)
 
 app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}`)
+
+  logger.info("Server started")
 })
 
 export default app
