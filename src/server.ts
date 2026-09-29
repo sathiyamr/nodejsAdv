@@ -7,7 +7,7 @@ import logger from "./core/Logger.js"
 import { errorHandler, notFound } from "./middleware/errorMiddleware.js"
 import userRoutes from "./routes/userRoutes.js"
 import todoRoutes from "./routes/todoRoutes.js"
-import "./database/index.js"
+import { connectDB } from "./database/index.js"
 
 dotenv.config()
 
@@ -34,10 +34,19 @@ app.use("/api/todos", todoRoutes)
 app.use(notFound)
 app.use(errorHandler)
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`)
+async function startServer() {
+  try {
+    await connectDB()
+    app.listen(port, () => {
+      console.log(`Server running on http://localhost:${port}`)
+      logger.info("Server started")
+    })
+  } catch (error) {
+    logger.error("Failed to start server because MongoDB connection failed", error)
+    process.exit(1)
+  }
+}
 
-  logger.info("Server started")
-})
+startServer()
 
 export default app
