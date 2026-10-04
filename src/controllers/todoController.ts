@@ -1,15 +1,19 @@
 import asyncHandler from "express-async-handler"
 import type { RequestHandler } from "express"
-import Todo from "../models/todoModel.js"
-import type { AuthRequest } from "../types/request.js"
+import Todo from "../models/todoModel.ts"
+import type { AuthRequest } from "../types/request.ts"
+import {
+  BadRequestError,
+  NotFoundError,
+  UnauthorizedError,
+} from "../core/CustomErrorHandler.ts"
 
 const createTodo: RequestHandler = asyncHandler(async (req: AuthRequest, res) => {
   const { title, description } = req.body
   console.log(req.user)
 
   if (!title || !description) {
-    res.status(400)
-    throw new Error("Title and Description are required")
+    throw new BadRequestError("Title and Description are required")
   }
 
   await Todo.create({ user: req.user!._id, title, description })
@@ -32,20 +36,17 @@ const editTodo: RequestHandler = asyncHandler(async (req: AuthRequest, res) => {
   const user = req.user!
 
   if (!title || !description || !status) {
-    res.status(400)
-    throw new Error("Title, Description, and Status are required")
+    throw new BadRequestError("Title, Description, and Status are required")
   }
 
   const todo = await Todo.findById(req.params.id)
 
   if (!todo) {
-    res.status(404)
-    throw new Error("Todo not found")
+    throw new NotFoundError("Todo not found")
   }
 
   if (todo.user.toString() !== user._id.toString()) {
-    res.status(401)
-    throw new Error("Not authorized to update this todo")
+    throw new UnauthorizedError("Not authorized to update this todo")
   }
 
   todo.title = title
@@ -64,8 +65,7 @@ const deleteTodo: RequestHandler = asyncHandler(async (req: AuthRequest, res) =>
     await todo.deleteOne()
     res.json({ message: "Todo removed" })
   } else {
-    res.status(404)
-    throw new Error("Todo not found")
+    throw new NotFoundError("Todo not found")
   }
 })
 

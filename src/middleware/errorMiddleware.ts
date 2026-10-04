@@ -1,22 +1,30 @@
 import type { ErrorRequestHandler, RequestHandler } from "express"
+import { ApiError } from "../core/ApiError.ts"
+import { InternalServerError, NotFoundError } from "../core/CustomErrorHandler.ts"
+import logger from "../core/Logger.ts"
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
-  let statusCode = res.statusCode === 200 ? 500 : res.statusCode
-  let message = err.message
-  if (err.name === "CastError" && err.kind === "ObjectId") {
-    message = "Resource Not Found"
-    statusCode = 404
+  if (res.headersSent) {
+    next(err)
+    return
   }
-  res.status(statusCode)
-  res.json({
-    message: message,
-    stack: process.env.NODE_ENV === "development" ? err.stack : null,
-  })
+
+  if (err instanceof ApiError) {
+    ApiError.handle(err, res)
+    logger.error(err)
+    return
+  }
+
+  if (err instanceof Error && err.name === "CastError") {
+    ApiError.handle(new NotFoundError("Resource Not Found"), res)
+    return
+  }
+
+  ApiError.handle(new InternalServerError(), res)
 }
 
 const notFound: RequestHandler = (req, res, next) => {
-  const error = new Error(`Not Found: ${req.originalUrl}`)
-  res.status(404)
+  const error = new NotFoundError(`Not Found: ${req.originalUrl}`)
   next(error)
 }
 

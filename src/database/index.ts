@@ -1,6 +1,6 @@
 import mongoose from "mongoose"
-import { db } from "../config.js"
-import Logger from "../core/Logger.js"
+import { db } from "../config.ts"
+import Logger from "../core/Logger.ts"
 
 const dbURI = `mongodb://${db.user}:${db.password}@${db.host}:${db.port}/${db.name}`
 

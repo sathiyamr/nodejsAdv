@@ -1,7 +1,11 @@
-import User from "../models/userModel.js"
+import User from "../models/userModel.ts"
 import asyncHandler from "express-async-handler"
 import type { RequestHandler } from "express"
-import generateToken from "../utils/generateToken.js"
+import generateToken from "../utils/generateToken.ts"
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from "../core/CustomErrorHandler.ts"
 
 const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   const { email, password } = req.body
@@ -17,8 +21,7 @@ const loginUser: RequestHandler = asyncHandler(async (req, res) => {
       isAdmin: user.isAdmin,
     })
   } else {
-    res.status(401)
-    throw new Error(" Invalid email or password")
+    throw new UnauthorizedError("Invalid email or password")
   }
 })
 
@@ -28,8 +31,7 @@ const registerUser: RequestHandler = asyncHandler(async (req, res) => {
   const userExists = await User.findOne({ email })
 
   if (userExists) {
-    res.status(400)
-    throw new Error("User already Exists")
+    throw new BadRequestError("User already Exists")
   }
 
   const user = await User.create({ name, email, password })
@@ -44,8 +46,7 @@ const registerUser: RequestHandler = asyncHandler(async (req, res) => {
       isAdmin: user.isAdmin,
     })
   } else {
-    res.status(400)
-    throw new Error("Invalid User Credentials")
+    throw new BadRequestError("Invalid User Credentials")
   }
 })
 

@@ -1,11 +1,6 @@
 import express, { type Router } from "express"
-import {
-  createTodo,
-  getTodos,
-  editTodo,
-  deleteTodo,
-} from "../controllers/todoController.js"
-import { protect } from "../middleware/authMiddleware.js"
+import { createTodo, getTodos, editTodo, deleteTodo } from "../controllers/todoController.ts"
+import { protect } from "../middleware/authMiddleware.ts"
 
 const router: Router = express.Router()
 

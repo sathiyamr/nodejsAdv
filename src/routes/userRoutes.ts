@@ -1,9 +1,5 @@
 import express, { type Router } from "express"
-import {
-  loginUser,
-  logoutUser,
-  registerUser,
-} from "../controllers/userController.js"
+import { loginUser, logoutUser, registerUser } from "../controllers/userController.ts"
 
 const router: Router = express.Router()
 
