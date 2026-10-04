@@ -35,10 +35,6 @@ const editTodo: RequestHandler = asyncHandler(async (req: AuthRequest, res) => {
 
   const user = req.user!
 
-  if (!title || !description || !status) {
-    throw new BadRequestError("Title, Description, and Status are required")
-  }
-
   const todo = await Todo.findById(req.params.id)
 
   if (!todo) {
@@ -49,9 +45,9 @@ const editTodo: RequestHandler = asyncHandler(async (req: AuthRequest, res) => {
     throw new UnauthorizedError("Not authorized to update this todo")
   }
 
-  todo.title = title
-  todo.description = description
-  todo.status = status
+  if (title !== undefined) todo.title = title
+  if (description !== undefined) todo.description = description
+  if (status !== undefined) todo.status = status
 
   const updatedTodo = await todo.save()
 
