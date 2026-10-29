@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler, RequestHandler } from "express"
+import multer from "multer"
 import { ApiError } from "../core/ApiError.ts"
-import { InternalServerError, NotFoundError } from "../core/CustomErrorHandler.ts"
+import { BadRequestError, InternalServerError, NotFoundError } from "../core/CustomErrorHandler.ts"
 import logger from "../core/Logger.ts"
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
@@ -12,6 +13,19 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   if (err instanceof ApiError) {
     ApiError.handle(err, res)
     logger.error(err)
+    return
+  }
+
+  if (err instanceof multer.MulterError) {
+    const message =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "Profile picture must be 5 MB or smaller"
+        : err.code === "LIMIT_UNEXPECTED_FILE"
+          ? "Upload one image using the profilePicture field"
+          : err.message
+    const uploadError = new BadRequestError(message)
+    ApiError.handle(uploadError, res)
+    logger.error(uploadError)
     return
   }
 

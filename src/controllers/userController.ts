@@ -2,6 +2,7 @@ import User from "../models/userModel.ts"
 import asyncHandler from "express-async-handler"
 import type { RequestHandler } from "express"
 import generateToken from "../utils/generateToken.ts"
+import ProfilePicture from "../models/profilePictureModel.ts"
 import {
   BadRequestError,
   UnauthorizedError,
@@ -14,11 +15,13 @@ const loginUser: RequestHandler = asyncHandler(async (req, res) => {
 
   if (user && (await user.matchPassword(password))) {
     generateToken(res, user._id)
+    const profilePicture = await ProfilePicture.findOne({ user: user._id }).select("filename")
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      profilePicture: profilePicture ? `/uploads/profile/${profilePicture.filename}` : null,
     })
   } else {
     throw new UnauthorizedError("Invalid email or password")
@@ -38,12 +41,14 @@ const registerUser: RequestHandler = asyncHandler(async (req, res) => {
 
   if (user) {
     generateToken(res, user._id)
+    const profilePicture = await ProfilePicture.findOne({ user: user._id }).select("filename")
     res.status(201)
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      profilePicture: profilePicture ? `/uploads/profile/${profilePicture.filename}` : null,
     })
   } else {
     throw new BadRequestError("Invalid User Credentials")

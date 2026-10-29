@@ -6,6 +6,8 @@ import dotenv from "dotenv"
 import { errorHandler, notFound } from "./middleware/errorMiddleware.ts"
 import userRoutes from "./routes/userRoutes.ts"
 import todoRoutes from "./routes/todoRoutes.ts"
+import profileRoutes from "./routes/profileRoutes.ts"
+import { UPLOADS_DIR } from "./config/uploadPaths.ts"
 
 dotenv.config()
 
@@ -20,6 +22,7 @@ app.use(
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+app.use("/uploads", express.static(UPLOADS_DIR))
 
 app.get("/", (_req, res) => {
   res.json({ message: "API is running" })
@@ -27,6 +30,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/users", userRoutes)
 app.use("/api/todos", todoRoutes)
+app.use("/api/profile", profileRoutes)
 
 app.use(notFound)
 app.use(errorHandler)
