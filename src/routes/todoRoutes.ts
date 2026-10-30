@@ -5,10 +5,13 @@ import { validate, ValidationSource } from "../helpers/validators.ts"
 import { createTodoSchema, editTodoSchema, todoParamsSchema } from "../models/todoSchema.ts"
 import upload from "../middleware/uploadMiddleware.ts"
 import apiKeyAuth from "../auth/apiKey.ts"
+import { permissionVaidation } from "../helpers/permissionValidation.ts"
+import { Permission } from "../models/ApiKeyModel.ts"
 
 const router: Router = express.Router()
 
 router.use(apiKeyAuth)
+router.use(permissionVaidation(Permission.GENERAL))
 
 router
   .route("/")

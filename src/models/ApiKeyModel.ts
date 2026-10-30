@@ -2,6 +2,7 @@ import { model, Schema, Types } from "mongoose"
 
 export enum Permission {
   GENERAL = "GENERAL",
+  CREATE = "CREATE",
 }
 
 export interface ApiKeyDoc {
