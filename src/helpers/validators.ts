@@ -23,7 +23,11 @@ export const validate = (schema: z.ZodType, source: ValidationSource = Validatio
       })
       return next(new BadRequestError(messages.join(", ")))
     }
-    req[source] = result.data
+    if (source === ValidationSource.HEADERS) {
+      Object.assign(req.headers, result.data)
+    } else {
+      req[source] = result.data
+    }
     next()
   }
 }

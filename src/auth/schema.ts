@@ -16,10 +16,14 @@ export const zodAuthBearer = z
 // export type ApiKeySchema = z.infer<typeof apiKeySchema>
 
 export default {
-  apiKey: z.object({
-    [ApiKeyHeader.API_KEY]: z.string().nonempty(`${ApiKeyHeader.API_KEY} is required`),
-  }),
-  auth: z.object({
-    authorization: zodAuthBearer,
-  }),
+  apiKey: z
+    .object({
+      [ApiKeyHeader.API_KEY]: z.string().nonempty(`${ApiKeyHeader.API_KEY} is required`),
+    })
+    .loose(),
+  auth: z
+    .object({
+      authorization: zodAuthBearer,
+    })
+    .loose(),
 }

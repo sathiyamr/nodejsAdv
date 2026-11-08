@@ -11,4 +11,5 @@ export interface ApiKeyRequest extends Request {
   keyStore?: KeyStoreModel
   accessToken?: string
   user?: UserDocument
+  apiKey?: ApiKeyDoc
 }
