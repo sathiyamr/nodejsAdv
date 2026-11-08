@@ -7,6 +7,7 @@ import upload from "../middleware/uploadMiddleware.ts"
 import apiKeyAuth from "../auth/apiKey.ts"
 import { permissionVaidation } from "../helpers/permissionValidation.ts"
 import { Permission } from "../models/ApiKeyModel.ts"
+import authentication from "../auth/authentication.ts"
 
 const router: Router = express.Router()
 
@@ -16,7 +17,7 @@ router.use(permissionVaidation(Permission.GENERAL))
 router
   .route("/")
   .post(upload.none(), validate(createTodoSchema, ValidationSource.BODY), protect, createTodo)
-  .get(protect, getTodos)
+  .get(authentication, getTodos)
 router
   .route("/:id")
   .put(

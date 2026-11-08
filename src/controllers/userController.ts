@@ -1,12 +1,12 @@
+import crypto from "crypto"
 import User from "../models/userModel.ts"
 import asyncHandler from "express-async-handler"
 import type { RequestHandler } from "express"
 import generateToken from "../utils/generateToken.ts"
 import ProfilePicture from "../models/profilePictureModel.ts"
-import {
-  BadRequestError,
-  UnauthorizedError,
-} from "../core/CustomErrorHandler.ts"
+import { BadRequestError, UnauthorizedError } from "../core/CustomErrorHandler.ts"
+import { createKeyStore } from "./KeyStoreController.ts"
+import { createTokens } from "../auth/utils.ts"
 
 const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   const { email, password } = req.body
@@ -14,7 +14,33 @@ const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   const user = await User.findOne({ email })
 
   if (user && (await user.matchPassword(password))) {
-    generateToken(res, user._id)
+    // Commenting out the below fn
+    // generateToken(res, user._id)
+
+    // Create the AccessTokenKey and RefreshTokenKey from crypto
+    const accessTokenKey = crypto.randomBytes(32).toString("hex")
+    const refreshTokenKey = crypto.randomBytes(32).toString("hex")
+
+    // we need to store this in key store and for that we can make use of the controller
+    await createKeyStore(user, accessTokenKey, refreshTokenKey)
+
+    // now we need to call createTokens from the utils
+    const { accessToken, refreshToken } = await createTokens(user, accessTokenKey, refreshTokenKey)
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000, //1 day
+    })
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV !== "development",
+      sameSite: "strict",
+      maxAge: 30 * 24 * 60 * 60 * 1000, //30days
+    })
+
     const profilePicture = await ProfilePicture.findOne({ user: user._id }).select("filename")
     res.json({
       _id: user._id,
