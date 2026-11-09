@@ -3,12 +3,13 @@ import asyncHandler from "express-async-handler"
 import { validate, ValidationSource } from "../helpers/validators.ts"
 import schema from "./schema.ts"
 import type { ApiKeyRequest } from "../types/request.ts"
-import { ApiKeyHeader, getAccessToken } from "./utils.ts"
-import { decode } from "../core/JWT.ts"
+import { ApiKeyHeader, getAccessToken, validateTokenData } from "./utils.ts"
+import JWT from "../core/JWT.ts"
 import User from "../models/userModel.ts"
 import { UnauthorizedError } from "../core/CustomErrorHandler.ts"
 import KeyStore from "../models/KeyStoreModel.ts"
 import { ApiError } from "../core/ApiError.ts"
+import { tokenInfo } from "../config.ts"
 
 const router: Router = express.Router()
 
@@ -20,7 +21,9 @@ router.use(
     _req.accessToken = accessToken
 
     try {
-      const decodedAccessToken = await decode(_req.accessToken)
+      const decodedAccessToken = await JWT.decode(_req.accessToken)
+      await JWT.validate(_req.accessToken, tokenInfo.secret)
+      validateTokenData(decodedAccessToken)
       const userId = decodedAccessToken.sub
       const user = await User.findById(userId)
       if (!user) throw new UnauthorizedError("User not registered")

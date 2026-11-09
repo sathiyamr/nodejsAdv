@@ -8,6 +8,7 @@ import userRoutes from "./routes/userRoutes.ts"
 import todoRoutes from "./routes/todoRoutes.ts"
 import profileRoutes from "./routes/profileRoutes.ts"
 import { UPLOADS_DIR } from "./config/uploadPaths.ts"
+import keyStoreRoutes from "./routes/keyStoreRoutes.ts"
 
 dotenv.config()
 
@@ -31,6 +32,7 @@ app.get("/", (_req, res) => {
 app.use("/api/users", userRoutes)
 app.use("/api/todos", todoRoutes)
 app.use("/api/profile", profileRoutes)
+app.use("/api/keystore", keyStoreRoutes)
 
 app.use(notFound)
 app.use(errorHandler)

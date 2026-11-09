@@ -6,7 +6,10 @@ import generateToken from "../utils/generateToken.ts"
 import ProfilePicture from "../models/profilePictureModel.ts"
 import { BadRequestError, UnauthorizedError } from "../core/CustomErrorHandler.ts"
 import { createKeyStore } from "./KeyStoreController.ts"
-import { createTokens } from "../auth/utils.ts"
+import { createTokens, validateTokenData } from "../auth/utils.ts"
+import JWT from "../core/JWT.ts"
+import KeyStore from "../models/KeyStoreModel.ts"
+import { tokenInfo } from "../config.ts"
 
 const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   const { email, password } = req.body
@@ -52,6 +55,62 @@ const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   } else {
     throw new UnauthorizedError("Invalid email or password")
   }
+})
+
+const refreshAccessToken: RequestHandler = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies?.refreshToken || req.body?.refreshToken
+  if (!refreshToken) throw new BadRequestError("Refresh token is required")
+
+  const decodedRefreshToken = await JWT.decode(refreshToken)
+  await JWT.validate(refreshToken, tokenInfo.secret)
+  validateTokenData(decodedRefreshToken)
+  const userId = decodedRefreshToken.sub
+  const user = await User.findById(userId)
+  if (!user) throw new UnauthorizedError("User not registered")
+
+  const keyStore = await KeyStore.findOne({
+    client: user,
+    secondaryKey: decodedRefreshToken.prm,
+    status: true,
+  })
+
+  if (!keyStore) throw new UnauthorizedError("User not authorized")
+
+  await KeyStore.findByIdAndDelete(keyStore._id)
+
+  // Create the AccessTokenKey and RefreshTokenKey from crypto
+  const accessTokenKey = crypto.randomBytes(32).toString("hex")
+  const refreshTokenKey = crypto.randomBytes(32).toString("hex")
+
+  // we need to store this in key store and for that we can make use of the controller
+  await createKeyStore(user, accessTokenKey, refreshTokenKey)
+
+  // now we need to call createTokens from the utils
+  const { accessToken, refreshToken: newRefreshToken } = await createTokens(
+    user,
+    accessTokenKey,
+    refreshTokenKey,
+  )
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "development",
+    sameSite: "strict",
+    maxAge: 24 * 60 * 60 * 1000, //1 day
+  })
+
+  res.cookie("refreshToken", newRefreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "development",
+    sameSite: "strict",
+    maxAge: 30 * 24 * 60 * 60 * 1000, //30days
+  })
+
+  res.status(200).json({
+    message: "Tokens refreshed successfully",
+    accessToken,
+    refreshToken: newRefreshToken,
+  })
 })
 
 const registerUser: RequestHandler = asyncHandler(async (req, res) => {
@@ -165,4 +224,4 @@ const logoutUser: RequestHandler = asyncHandler(async (req, res) => {
   })
 })
 
-export { loginUser, registerUser, logoutUser }
+export { loginUser, registerUser, logoutUser, refreshAccessToken }

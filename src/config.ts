@@ -18,7 +18,7 @@ export const db = {
 export const corsUrl = process.env.CORS_URL
 
 export const tokenInfo = {
-  accessTokenValidity: parseInt(process.env.ACCESS_TOKEN_VALIDITY_SECS ?? "3600", 10),
+  accessTokenValidity: parseInt(process.env.ACCESS_TOKEN_VALIDITY_SECS ?? "120", 10),
   refreshTokenValidity: parseInt(process.env.REFRESH_TOKEN_VALIDITY_SECS ?? "86400", 10),
   issuer: process.env.TOKEN_ISSUER ?? "",
   audience: process.env.TOKEN_AUDIENCE ?? "",
