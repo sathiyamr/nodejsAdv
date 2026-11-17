@@ -1,16 +1,21 @@
 import mongoose, { Schema, Types } from "mongoose"
 import bcrypt from "bcryptjs"
+import { DOCUMENT_NAME as ROLE_DOCUMENT_NAME, type RoleDoc } from "./RoleModel.ts"
 
-export interface UserDocument {
+export interface UserDoc {
   _id: Types.ObjectId
   name: string
   email: string
   password: string
   isAdmin?: boolean
+  roles: Types.ObjectId[]
   matchPassword(enteredPassword: string): Promise<boolean>
 }
 
-const userSchema = new Schema<UserDocument>(
+export const DOCUMENT_NAME = "User"
+export const COLLECTION_NAME = "users"
+
+const userSchema = new Schema<UserDoc>(
   {
     name: {
       type: String,
@@ -25,10 +30,17 @@ const userSchema = new Schema<UserDocument>(
       type: String,
       required: true,
     },
+    roles: [
+      {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: ROLE_DOCUMENT_NAME,
+      },
+    ],
   },
   {
     timestamps: true,
-  }
+  },
 )
 
 userSchema.methods.matchPassword = async function (enteredPassword: string) {
@@ -44,6 +56,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt)
 })
 
-const User = mongoose.model("User", userSchema)
+const User = mongoose.model(DOCUMENT_NAME, userSchema, COLLECTION_NAME)
 
 export default User

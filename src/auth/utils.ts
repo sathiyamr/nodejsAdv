@@ -5,18 +5,14 @@ import {
   InvalidTokenError,
 } from "../core/CustomErrorHandler.ts"
 import JWT, { JWTPayload } from "../core/JWT.ts"
-import type { UserDocument } from "../models/userModel.ts"
+import type { UserDoc } from "../models/userModel.ts"
 
 export enum ApiKeyHeader {
   API_KEY = "x-api-key",
   API_AUTH = "authorization",
 }
 
-export async function createTokens(
-  user: UserDocument,
-  accessTokenKey: string,
-  refreshTokenKey: string,
-) {
+export async function createTokens(user: UserDoc, accessTokenKey: string, refreshTokenKey: string) {
   const accessToken = await JWT.encode(
     new JWTPayload(
       tokenInfo.issuer,
@@ -24,6 +20,7 @@ export async function createTokens(
       user._id.toString(),
       accessTokenKey,
       tokenInfo.accessTokenValidity,
+      { roles: user.roles },
     ),
     tokenInfo.secret,
   )
@@ -35,6 +32,7 @@ export async function createTokens(
       user._id.toString(),
       refreshTokenKey,
       tokenInfo.refreshTokenValidity,
+      { roles: user.roles },
     ),
     tokenInfo.secret,
   )

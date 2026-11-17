@@ -1,13 +1,13 @@
 import mongoose, { Schema, Types } from "mongoose"
 
-export interface ProfilePictureDocument {
+export interface ProfilePictureDoc {
   user: Types.ObjectId
   filename: string
   mimeType: "image/jpeg" | "image/png" | "image/webp"
   size: number
 }
 
-const profilePictureSchema = new Schema<ProfilePictureDocument>(
+const profilePictureSchema = new Schema<ProfilePictureDoc>(
   {
     user: {
       type: Schema.Types.ObjectId,

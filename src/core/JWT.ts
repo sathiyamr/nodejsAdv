@@ -8,13 +8,22 @@ export class JWTPayload {
   prm: string
   expiry: number
   iat: number
-  constructor(issuer: string, audience: string, subject: string, param: string, validity: number) {
+  userInfo: any
+  constructor(
+    issuer: string,
+    audience: string,
+    subject: string,
+    param: string,
+    validity: number,
+    userInfo: any,
+  ) {
     this.iss = issuer
     this.aud = audience
     this.sub = subject
     this.prm = param
     this.iat = Math.floor(Date.now() / 1000)
     this.expiry = this.iat + validity
+    this.userInfo = userInfo
   }
 }
 

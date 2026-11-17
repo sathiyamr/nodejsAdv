@@ -1,13 +1,13 @@
 import type { RequestHandler } from "express"
-import KeyStore, { type KeyStoreModel } from "../models/KeyStoreModel.ts"
-import type { UserDocument } from "../models/userModel.ts"
+import KeyStore, { type KeyStoreDoc } from "../models/KeyStoreModel.ts"
+import type { UserDoc } from "../models/userModel.ts"
 import asyncHandler from "express-async-handler"
 
 export const createKeyStore = async (
-  client: UserDocument,
+  client: UserDoc,
   primaryKey: string,
   secondaryKey: string,
-): Promise<KeyStoreModel> => {
+): Promise<KeyStoreDoc> => {
   const key = await KeyStore.create({
     client,
     primaryKey,

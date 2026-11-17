@@ -1,8 +1,8 @@
 import { Schema, Types, model } from "mongoose"
-import type { UserDocument } from "./userModel.ts"
+import type { UserDoc } from "./userModel.ts"
 
-export interface KeyStoreModel {
-  client: Types.ObjectId | UserDocument
+export interface KeyStoreDoc {
+  client: Types.ObjectId | UserDoc
   primaryKey: string
   secondaryKey: string
   status: boolean
@@ -11,7 +11,7 @@ export interface KeyStoreModel {
 export const DOCUMENT_NAME = "KeyStore"
 export const COLLECTION_NAME = "keystores"
 
-const keystoreSchema = new Schema<KeyStoreModel>(
+const keystoreSchema = new Schema<KeyStoreDoc>(
   {
     client: {
       type: Schema.Types.ObjectId,
@@ -36,6 +36,6 @@ const keystoreSchema = new Schema<KeyStoreModel>(
 
 keystoreSchema.index({ client: 1, primaryKey: 1, secondaryKey: 1 })
 
-const KeyStore = model<KeyStoreModel>(DOCUMENT_NAME, keystoreSchema, COLLECTION_NAME)
+const KeyStore = model<KeyStoreDoc>(DOCUMENT_NAME, keystoreSchema, COLLECTION_NAME)
 
 export default KeyStore

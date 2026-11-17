@@ -54,5 +54,5 @@ const apiKeySchema = new Schema<ApiKeyDoc>(
 
 apiKeySchema.index({ key: 1, status: 1 })
 
-const ApiKeyModel = model<ApiKeyDoc>("ApiKey", apiKeySchema)
+const ApiKeyModel = model<ApiKeyDoc>(DOCUMENT_NAME, apiKeySchema, COLLECTION_NAME)
 export default ApiKeyModel

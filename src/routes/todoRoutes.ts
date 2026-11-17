@@ -8,16 +8,21 @@ import apiKeyAuth from "../auth/apiKey.ts"
 import { permissionVaidation } from "../helpers/permissionValidation.ts"
 import { Permission } from "../models/ApiKeyModel.ts"
 import authentication from "../auth/authentication.ts"
+import role from "../helpers/role.ts"
+import { ROLES } from "../models/RoleModel.ts"
+import authorization from "../auth/authorization.ts"
 
 const router: Router = express.Router()
 
 router.use(apiKeyAuth)
 router.use(permissionVaidation(Permission.GENERAL))
+router.use(authentication)
 
 router
   .route("/")
   .post(upload.none(), validate(createTodoSchema, ValidationSource.BODY), protect, createTodo)
-  .get(authentication, getTodos)
+  .get(role(ROLES.USER), authorization, getTodos)
+
 router
   .route("/:id")
   .put(

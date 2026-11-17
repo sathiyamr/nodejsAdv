@@ -10,6 +10,7 @@ import { createTokens, validateTokenData } from "../auth/utils.ts"
 import JWT from "../core/JWT.ts"
 import KeyStore from "../models/KeyStoreModel.ts"
 import { tokenInfo } from "../config.ts"
+import RoleModel, { ROLES } from "../models/RoleModel.ts"
 
 const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   const { email, password } = req.body
@@ -114,15 +115,20 @@ const refreshAccessToken: RequestHandler = asyncHandler(async (req, res) => {
 })
 
 const registerUser: RequestHandler = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body
+  const { name, email, password, type } = req.body
 
   const userExists = await User.findOne({ email })
 
   if (userExists) {
     throw new BadRequestError("User already Exists")
   }
+  const roleCode = type === ROLES.ADMIN ? ROLES.ADMIN : ROLES.USER
+  const userRole = await RoleModel.findOne({ code: roleCode, status: true })
+  if (!userRole) {
+    throw new BadRequestError("User Role Doesnt Exists")
+  }
 
-  const user = await User.create({ name, email, password })
+  const user = await User.create({ name, email, password, roles: [userRole._id] })
 
   if (user) {
     generateToken(res, user._id)

@@ -1,15 +1,20 @@
 import type { Request } from "express"
-import type { UserDocument } from "../models/userModel.ts"
+import type { UserDoc } from "../models/userModel.ts"
 import type { ApiKeyDoc } from "../models/ApiKeyModel.ts"
-import type { KeyStoreModel } from "../models/KeyStoreModel.ts"
+import type { KeyStoreDoc } from "../models/KeyStoreModel.ts"
+import type { RoleDoc, ROLES } from "../models/RoleModel.ts"
 
 export interface AuthRequest extends Request {
-  user?: UserDocument
+  user?: UserDoc
 }
 
 export interface ApiKeyRequest extends Request {
-  keyStore?: KeyStoreModel
+  keyStore?: KeyStoreDoc
   accessToken?: string
-  user?: UserDocument
+  user?: UserDoc
   apiKey?: ApiKeyDoc
+}
+
+export interface RoleRequest extends ApiKeyRequest {
+  currentRoleCodes?: ROLES[]
 }
